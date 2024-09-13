@@ -1,6 +1,7 @@
 services:
   backend:
     build: 
+      # Diretório onde está o Dockerfile
       context: ./CentralDasImagens
       dockerfile: Dockerfile
     container_name: backend-CentralDasImagens
@@ -11,8 +12,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/central
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-      SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver   
+
+      # Configura o Hibernate para atualizar o esquema automaticamente
       SPRING_JPA_HIBERNATE_DDL-AUTO: update
+    # Indica que o serviço backend depende do serviço db
     depends_on:
       - db
   db:
@@ -23,19 +27,27 @@ services:
       MYSQL_DATABASE: central
       MYSQL_USER: senac
       MYSQL_PASSWORD: senac
+    # Mapeia a porta 3306 do container para a porta 4306 da máquina host
     ports: 
       - "4306:3306"
     volumes:
       - mysql-db-CentralDasImagens:/var/lib/mysql
     healthcheck:
+      # Comando para verificar a saúde
       test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+      # Intervalo entre as verificações
       interval: 30s
+      # Tempo máximo para cada verificação
       timeout: 10s
+      # Número máximo de tentativas
       retries: 5
   frontend:
+    # Define como a imagem do container será construída
     build: ./central-das-imagens-front
+    # Mapeia a porta 80 do container para a porta 3000 da máquina host
     ports:
       - "3000:80"
+    # Indica que o serviço frontend depende dos serviços backend e db
     depends_on:
       - backend
       - db
